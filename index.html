@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Plork</title>
+		<link rel="icon" type="image/x-icon" href="favicon.ico" />
+		<!-- <link rel="stylesheet" type="text/css" href="style.css" /> -->
+
+		<script src="2025-07-31 Milwaukee, nyc, birthdays.js"></script>
+	</head>
+
+	<script>
+		const baseUrl =
+			'https://plork.duckdns.org/pics%202025-07-31%20Milwaukee,%20nyc,%20birthdays';
+		const urlParams = new URLSearchParams(window.location.search);
+		let index = parseInt(urlParams.get('i')) || 0;
+
+		// console.log('filenames', filenames);
+
+		function updateDisplay() {
+			const url = new URL(window.location);
+			url.searchParams.set('i', index);
+			window.history.replaceState({}, '', url);
+			const src = `${baseUrl}/${filenames[index]}`;
+			let html;
+			if (src.endsWith('.mp4')) {
+				html = `<video controls style="max-width: 100%; max-height: calc(100vh - 180px); margin: 40px 0; object-fit: contain;"><source src="${src}" type="video/mp4"/></video>`;
+			} else {
+				html = `<img src="${src}" alt="Image" style="max-width: 100%; max-height: calc(100vh - 180px); margin: 40px 0; object-fit: contain;"/>`;
+			}
+			document.getElementById('file-container').innerHTML = html;
+
+			// Update counter
+			document.getElementById('counter').textContent = `${index + 1} / ${
+				filenames.length
+			}`;
+		}
+
+		function previousImage() {
+			index--;
+			if (index < 0) {
+				index = filenames.length - 1;
+			}
+			updateDisplay();
+		}
+
+		function nextImage() {
+			index++;
+			if (index >= filenames.length) {
+				index = 0;
+			}
+			updateDisplay();
+		}
+
+		// Keyboard navigation
+		document.addEventListener('keydown', function (event) {
+			if (event.key === 'ArrowLeft') {
+				previousImage();
+			} else if (event.key === 'ArrowRight') {
+				nextImage();
+			}
+		});
+	</script>
+
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			margin: 0;
+			padding: 0;
+			background-color: #f4f4f4;
+			height: 100vh;
+			overflow: hidden;
+			display: flex;
+			flex-direction: column;
+		}
+
+		h1 {
+			color: #333;
+			text-align: center;
+			margin: 20px 0;
+			flex-shrink: 0;
+		}
+
+		p {
+			color: #666;
+		}
+
+		.main-container {
+			flex: 1;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			position: relative;
+			min-height: 0;
+			margin-top: 50px;
+		}
+
+		#file-container {
+			max-width: calc(100vw - 120px);
+			max-height: calc(100vh - 100px);
+			margin: 40px 0;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		#file-container img,
+		#file-container video {
+			max-width: 100%;
+			max-height: calc(100% - 80px);
+			margin: 40px 0;
+			object-fit: contain;
+		}
+
+		.nav-arrow {
+			position: absolute;
+			top: 50%;
+			transform: translateY(-50%);
+			font-size: 30px;
+			color: #333;
+			cursor: pointer;
+			user-select: none;
+			padding: 10px;
+			background-color: rgba(255, 255, 255, 0.8);
+			border-radius: 50%;
+			width: 50px;
+			height: 50px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			transition: background-color 0.3s, opacity 0.3s;
+			z-index: 10;
+		}
+
+		.nav-arrow:hover {
+			background-color: rgba(255, 255, 255, 1);
+		}
+
+		.nav-arrow.disabled {
+			opacity: 0.3;
+			cursor: not-allowed;
+		}
+
+		.nav-arrow.left {
+			left: 20px;
+		}
+
+		.nav-arrow.right {
+			right: 20px;
+		}
+	</style>
+
+	<body onload="updateDisplay()">
+		<!-- <h1>Plork</h1> -->
+		<div
+			id="counter"
+			style="
+				text-align: center;
+				padding: 10px;
+				font-size: 16px;
+				color: #333;
+				background-color: rgba(255, 255, 255, 0.9);
+				position: fixed;
+				top: 0;
+				left: 0;
+				right: 0;
+				z-index: 20;
+			"
+		></div>
+		<div class="main-container">
+			<div class="nav-arrow left" onclick="previousImage()" id="left-arrow">
+				‹
+			</div>
+			<div id="file-container"></div>
+			<div class="nav-arrow right" onclick="nextImage()" id="right-arrow">
+				›
+			</div>
+		</div>
+	</body>
+</html>
