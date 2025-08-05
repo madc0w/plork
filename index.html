@@ -13,21 +13,32 @@
 			'https://plork.duckdns.org/pics%202025-07-31%20Milwaukee,%20nyc,%20birthdays';
 		const urlParams = new URLSearchParams(window.location.search);
 		let index = parseInt(urlParams.get('i')) || 0;
+		let isTransitioning = false;
 
 		// console.log('filenames', filenames);
+
+		function createMediaElement(src) {
+			if (src.endsWith('.mp4')) {
+				return `<video controls><source src="${src}" type="video/mp4"/></video>`;
+			} else {
+				return `<img src="${src}" alt="Image"/>`;
+			}
+		}
 
 		function updateDisplay() {
 			const url = new URL(window.location);
 			url.searchParams.set('i', index);
 			window.history.replaceState({}, '', url);
 			const src = `${baseUrl}/${filenames[index]}`;
-			let html;
-			if (src.endsWith('.mp4')) {
-				html = `<video controls style="max-width: 100%; max-height: calc(100vh - 180px); margin: 40px 0; object-fit: contain;"><source src="${src}" type="video/mp4"/></video>`;
-			} else {
-				html = `<img src="${src}" alt="Image" style="max-width: 100%; max-height: calc(100vh - 180px); margin: 40px 0; object-fit: contain;"/>`;
-			}
-			document.getElementById('file-container').innerHTML = html;
+			const html = createMediaElement(src);
+
+			// Clear container and add new slide
+			const container = document.getElementById('file-container');
+			container.innerHTML = '';
+			const slide = document.createElement('div');
+			slide.className = 'slide';
+			slide.innerHTML = html;
+			container.appendChild(slide);
 
 			// Update counter
 			document.getElementById('counter').textContent = `${index + 1} / ${
@@ -35,24 +46,95 @@
 			}`;
 		}
 
-		function previousImage() {
-			index--;
-			if (index < 0) {
-				index = filenames.length - 1;
+		function slideToImage(newIndex, direction) {
+			if (isTransitioning) return;
+			isTransitioning = true;
+
+			// Disable navigation arrows
+			document.getElementById('left-arrow').classList.add('disabled');
+			document.getElementById('right-arrow').classList.add('disabled');
+
+			const container = document.getElementById('file-container');
+			const newSrc = `${baseUrl}/${filenames[newIndex]}`;
+
+			// Get current slide
+			const currentSlide = container.querySelector('.slide');
+
+			// Create new slide element
+			const newSlide = document.createElement('div');
+			newSlide.className = 'slide';
+			newSlide.innerHTML = createMediaElement(newSrc);
+
+			// Position new slide off-screen
+			if (direction === 'right') {
+				newSlide.style.transform = 'translateX(100%)';
+			} else {
+				newSlide.style.transform = 'translateX(-100%)';
 			}
-			updateDisplay();
+
+			// Add new slide to container
+			container.appendChild(newSlide);
+
+			// Force reflow
+			newSlide.offsetHeight;
+
+			// Animate slides
+			requestAnimationFrame(() => {
+				if (currentSlide) {
+					if (direction === 'right') {
+						currentSlide.style.transform = 'translateX(-100%)';
+					} else {
+						currentSlide.style.transform = 'translateX(100%)';
+					}
+				}
+				newSlide.style.transform = 'translateX(0)';
+
+				// Clean up after transition
+				setTimeout(() => {
+					// Remove all slides except the new one
+					const allSlides = container.querySelectorAll('.slide');
+					allSlides.forEach((slide) => {
+						if (slide !== newSlide) {
+							slide.remove();
+						}
+					});
+
+					isTransitioning = false;
+
+					// Re-enable navigation arrows
+					document.getElementById('left-arrow').classList.remove('disabled');
+					document.getElementById('right-arrow').classList.remove('disabled');
+				}, 300);
+			});
+
+			index = newIndex;
+
+			// Update counter
+			document.getElementById('counter').textContent = `${index + 1} / ${
+				filenames.length
+			}`;
+
+			// Update URL
+			const url = new URL(window.location);
+			url.searchParams.set('i', index);
+			window.history.replaceState({}, '', url);
+		}
+
+		function previousImage() {
+			if (isTransitioning) return;
+			const newIndex = index - 1 < 0 ? filenames.length - 1 : index - 1;
+			slideToImage(newIndex, 'left');
 		}
 
 		function nextImage() {
-			index++;
-			if (index >= filenames.length) {
-				index = 0;
-			}
-			updateDisplay();
+			if (isTransitioning) return;
+			const newIndex = index + 1 >= filenames.length ? 0 : index + 1;
+			slideToImage(newIndex, 'right');
 		}
 
 		// Keyboard navigation
 		document.addEventListener('keydown', function (event) {
+			if (isTransitioning) return;
 			if (event.key === 'ArrowLeft') {
 				previousImage();
 			} else if (event.key === 'ArrowRight') {
@@ -95,19 +177,29 @@
 		}
 
 		#file-container {
-			max-width: calc(100vw - 120px);
-			max-height: calc(100vh - 100px);
+			width: calc(100vw - 120px);
+			height: calc(100vh - 100px);
 			margin: 40px 0;
+			position: relative;
+			overflow: hidden;
+		}
+
+		.slide {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
 			display: flex;
 			align-items: center;
 			justify-content: center;
+			transition: transform 0.3s ease-in-out;
 		}
 
-		#file-container img,
-		#file-container video {
+		.slide img,
+		.slide video {
 			max-width: 100%;
-			max-height: calc(100% - 80px);
-			margin: 40px 0;
+			max-height: 100%;
 			object-fit: contain;
 		}
 
@@ -138,6 +230,7 @@
 		.nav-arrow.disabled {
 			opacity: 0.3;
 			cursor: not-allowed;
+			pointer-events: none;
 		}
 
 		.nav-arrow.left {
