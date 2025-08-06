@@ -20,7 +20,7 @@
 		// Function to get files from a specific directory path
 		function getFilesFromPath(path) {
 			// console.log('getFilesFromPath', path);
-			if (typeof fileData === 'undefined') {
+			if (!fileData) {
 				console.error('fileData is not available');
 				return [];
 			}
@@ -62,7 +62,7 @@
 						: [],
 				});
 			}
-			return tree;
+			return tree.reverse();
 		}
 
 		// Function to render directory tree
@@ -377,6 +377,7 @@
 			flex: 1;
 			display: flex;
 			min-height: 0;
+			margin-top: 40px; /* Add margin to push content below the fixed header */
 		}
 
 		.directory-panel {
@@ -576,7 +577,7 @@
 		</button>
 		<div class="app-container">
 			<div class="directory-panel">
-				<h3>📁 Directories</h3>
+				<!-- <h3>📁 Directories</h3> -->
 				<div id="directory-tree"></div>
 			</div>
 			<div class="main-container">
