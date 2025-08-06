@@ -132,6 +132,20 @@
 			slideToImage(newIndex, 'right');
 		}
 
+		function downloadCurrentFile() {
+			const currentFilename = filenames[index];
+			const src = `${baseUrl}/${currentFilename}`;
+
+			// Create a temporary anchor element to trigger download
+			const link = document.createElement('a');
+			link.href = src;
+			link.download = currentFilename;
+			link.target = '_blank';
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+		}
+
 		// Keyboard navigation
 		document.addEventListener('keydown', function (event) {
 			if (isTransitioning) return;
@@ -240,6 +254,43 @@
 		.nav-arrow.right {
 			right: 20px;
 		}
+
+		.download-button {
+			position: fixed;
+			top: 20px;
+			right: 20px;
+			width: 50px;
+			height: 50px;
+			background: linear-gradient(
+				135deg,
+				rgba(255, 255, 255, 0.95),
+				rgba(240, 240, 240, 0.95)
+			);
+			border: 2px solid rgba(200, 200, 200, 0.3);
+			border-radius: 50%;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 18px;
+			color: #555;
+			transition: all 0.3s ease;
+			z-index: 20;
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+		}
+
+		.download-button:hover {
+			background: linear-gradient(135deg, #4caf50, #45a049);
+			color: white;
+			border-color: rgba(76, 175, 80, 0.3);
+			transform: scale(1.1);
+			box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+		}
+
+		.download-button:active {
+			transform: scale(0.95);
+			box-shadow: 0 2px 6px rgba(76, 175, 80, 0.4);
+		}
 	</style>
 
 	<body onload="updateDisplay()">
@@ -259,6 +310,13 @@
 				z-index: 20;
 			"
 		></div>
+		<button
+			class="download-button"
+			onclick="downloadCurrentFile()"
+			title="Download current file"
+		>
+			↓
+		</button>
 		<div class="main-container">
 			<div class="nav-arrow left" onclick="previousImage()" id="left-arrow">
 				‹
