@@ -17,6 +17,22 @@
 		let filenames = [];
 		let currentDirPath = '';
 
+		// Function to toggle directory panel
+		function toggleDirectoryPanel() {
+			const panel = document.getElementById('directory-panel');
+			const toggleBtn = document.getElementById('panel-toggle');
+
+			panel.classList.toggle('collapsed');
+
+			if (panel.classList.contains('collapsed')) {
+				toggleBtn.textContent = '►';
+				toggleBtn.title = 'Expand directory panel';
+			} else {
+				toggleBtn.textContent = '◄';
+				toggleBtn.title = 'Collapse directory panel';
+			}
+		}
+
 		// Function to get files from a specific directory path
 		function getFilesFromPath(path) {
 			// console.log('getFilesFromPath', path);
@@ -406,7 +422,20 @@
 			border-right: 2px solid #ddd;
 			overflow-y: auto;
 			padding: 10px;
+			padding-top: 50px; /* Make space for toggle button */
 			box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+			transition: width 0.3s ease, padding 0.3s ease;
+			position: relative;
+		}
+
+		.directory-panel.collapsed {
+			width: 50px;
+			padding: 10px 5px;
+			padding-top: 50px; /* Keep space for toggle button when collapsed */
+		}
+
+		.directory-panel.collapsed #directory-tree {
+			display: none;
 		}
 
 		.directory-panel h3 {
@@ -452,6 +481,41 @@
 		.tree-name.selected:hover {
 			background-color: #45a049 !important;
 			color: white !important;
+		}
+
+		.panel-toggle {
+			position: absolute;
+			top: 10px;
+			right: 10px;
+			width: 30px;
+			height: 30px;
+			background: linear-gradient(135deg, #4caf50, #45a049);
+			color: white;
+			border: none;
+			border-radius: 50%;
+			cursor: pointer;
+			font-size: 16px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			transition: all 0.3s ease;
+			z-index: 10;
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		}
+
+		.panel-toggle:hover {
+			background: linear-gradient(135deg, #45a049, #3d8b40);
+			transform: scale(1.1);
+			box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+		}
+
+		.panel-toggle:active {
+			transform: scale(0.95);
+		}
+
+		/* Ensure toggle button is visible when collapsed */
+		.directory-panel.collapsed .panel-toggle {
+			right: 10px; /* Center it in the collapsed panel */
 		}
 
 		.main-container {
@@ -607,7 +671,15 @@
 			↓
 		</button>
 		<div class="app-container">
-			<div class="directory-panel">
+			<div class="directory-panel" id="directory-panel">
+				<button
+					class="panel-toggle"
+					onclick="toggleDirectoryPanel()"
+					id="panel-toggle"
+					title="Collapse directory panel"
+				>
+					◄
+				</button>
 				<!-- <h3>📁 Directories</h3> -->
 				<div id="directory-tree"></div>
 			</div>
