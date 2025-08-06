@@ -79,6 +79,7 @@
 				const nameSpan = document.createElement('span');
 				nameSpan.className = 'tree-name';
 				nameSpan.textContent = item.name;
+				nameSpan.setAttribute('data-path', item.path);
 				if (item.hasFiles) {
 					nameSpan.style.cursor = 'pointer';
 					nameSpan.style.color = '#4caf50';
@@ -107,6 +108,23 @@
 			});
 		}
 
+		// Function to update directory highlighting
+		function updateDirectoryHighlight() {
+			// Remove previous selection
+			const allTreeNames = document.querySelectorAll('.tree-name');
+			allTreeNames.forEach((name) => name.classList.remove('selected'));
+
+			// Highlight current directory
+			if (currentDir) {
+				const currentTreeName = document.querySelector(
+					`[data-path="${currentDir}"]`
+				);
+				if (currentTreeName) {
+					currentTreeName.classList.add('selected');
+				}
+			}
+		}
+
 		// Function to select a directory and load its files
 		function selectDirectory(dirPath) {
 			currentDir = dirPath;
@@ -120,6 +138,7 @@
 			url.searchParams.set('i', '0');
 			window.history.replaceState({}, '', url);
 
+			updateDirectoryHighlight();
 			updateDisplay();
 		}
 
@@ -172,6 +191,7 @@
 				}
 			}
 
+			updateDirectoryHighlight();
 			updateDisplay();
 		}
 
@@ -421,6 +441,17 @@
 
 		.tree-name:hover {
 			background-color: #f0f0f0;
+		}
+
+		.tree-name.selected {
+			background-color: #4caf50 !important;
+			color: white !important;
+			font-weight: bold;
+		}
+
+		.tree-name.selected:hover {
+			background-color: #45a049 !important;
+			color: white !important;
 		}
 
 		.main-container {

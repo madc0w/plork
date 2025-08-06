@@ -80506,12 +80506,3 @@ const fileData = {
 		},
 	},
 };
-
-// Export for different module systems
-if (typeof module !== 'undefined' && module.exports) {
-	module.exports = fileData;
-}
-
-if (typeof window !== 'undefined') {
-	window.fileData = fileData;
-}
